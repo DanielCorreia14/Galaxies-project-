@@ -11,6 +11,14 @@ A Andrômeda quer integrar dados de Pokémon para uma campanha do **Dia das Cria
 
 ## Solução
 
+### Estratégias Adotadas
+
+Para explorar a API, os endpoints foram mapeados antes de qualquer implementação, identificando que cada Pokémon exigiria três chamadas distintas: listagem paginada, detalhes individuais e species para obter a geração. Esse mapeamento definiu tanto o fluxo do script quanto as decisões de modelagem.
+
+A principal decisão foi separar moves e abilities em tabelas de dimensão com relações N:N, dado o volume de dados retornado por Pokémon — o resultado confirmou a escolha, com a tabela pokemon_moves acumulando 618.519 registros, preservando o histórico completo de moveset por versão e método de aprendizado.
+
+O script foi estruturado em seções bem definidas — configuração, DDL, helpers, processamento e loop principal — com logs de progresso, retry com backoff exponencial e execução idempotente, permitindo retomada sem duplicação de dados em caso de interrupção.
+
 ### Extração
 
 O script `pokeapi_etl.py` consome a PokéAPI em duas etapas por Pokémon:
@@ -26,6 +34,15 @@ No total foram realizadas **~2.700 requisições** para cobrir os 1.350 Pokémon
 - **Idempotente** — se a execução for interrompida, pode ser retomada sem duplicar dados (`ON CONFLICT DO NOTHING` + checagem de existência antes de inserir).
 - **Commit por Pokémon** — cada Pokémon é commitado individualmente, garantindo que uma falha não desfaça o progresso anterior.
 
+## Estratégias Adotadas
+
+Para explorar a API antes de codar, mapeamos os endpoints necessários e a estrutura dos retornos, identificando que cada Pokémon exigiria três chamadas distintas: listagem paginada, detalhes individuais e species para obter a geração. Esse mapeamento prévio definiu tanto o fluxo do script quanto as decisões de modelagem.
+
+A principal delas foi separar moves e abilities em tabelas de dimensão com relações N:N, dado o volume de dados retornado por Pokémon — o resultado real confirmou a escolha, com a tabela pokemon_moves acumulando 618.519 registros preservando o histórico completo de moveset por versão e método de aprendizado.
+
+O script foi estruturado em seções bem definidas — configuração, DDL, helpers, processamento e loop principal — com logs de progresso, retry com backoff exponencial e execução idempotente, permitindo retomada sem duplicação de dados em caso de interrupção.
+
+---
 ### Credenciais
 
 As credenciais do banco são lidas de um arquivo `.env` (não versionado). O repositório contém um `.env.example` como referência:
