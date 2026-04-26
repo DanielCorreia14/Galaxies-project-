@@ -75,8 +75,6 @@ A categoria estava grafada como `'Clothng'` (faltava o `'i'`). Nenhuma condiçã
 UPDATE products SET category = 'Clothing' WHERE category = 'Clothng';
 ```
 
-> **Nota:** após a correção, o T-Shirt ainda aparece como `NULL` nos resultados porque `'Clothing'` não estava mapeado na query original. A query corrigida já inclui esse mapeamento com importância `'Low'`.
-
 ---
 
 ### 5. `'toys'` vs `'Toys'` — Action Figure sem importância
@@ -145,11 +143,10 @@ A tabela abaixo compara o output das duas queries rodando sobre os mesmos dados:
 | Laptop       | 2025-08-02      | High                | 1              | 2500.0      | 2500.0     |
 | Notebook     | 2025-08-02      | Low                 | **15** ✓       | 150.0       | 10.0       |
 | Office Chair | 2025-08-02      | Low                 | 1              | 450.0       | 450.0      |
-| T-Shirt      | 2025-08-03      | NULL*               | 2              | 100.0       | 50.0       |
+| T-Shirt      | 2025-08-03      | Low ✓               | 2              | 100.0       | 50.0       |
 | Gift Card    | 2025-08-03      | High                | 1              | 100.0       | 100.0      |
 | Book         | 2025-08-03      | Medium              | 3              | 0**         | 0          |
 
-> *T-Shirt permanece `NULL` pois o typo `'Clothng'` ainda está nos dados de origem. Corrigido via `UPDATE` recomendado na tabela `products`.  
 > **Book permanece com `total_value = 0` pois o `price = 0` está na transação de origem. Investigação e correção na fonte são recomendadas.
 
 ---
@@ -161,7 +158,7 @@ A tabela abaixo compara o output das duas queries rodando sobre os mesmos dados:
 | 1 | Query | `transaction_id` no `GROUP BY` impedia agregação | Removido do `GROUP BY` |
 | 2 | Query | Typo `'Electonics'` no `CASE WHEN` | Corrigido + `TRIM()` aplicado |
 | 3 | Dados | Trailing space em `'Electronics '` (product_id=1) | `TRIM()` na query + `UPDATE` recomendado |
-| 4 | Dados | Typo `'Clothng'` (product_id=6) | `UPDATE` recomendado na origem |
+| 4 | Dados | Typo `'Clothng'` (product_id=6) | `UPDATE` aplicado na origem — `category_importance` corrigida para `Low` |
 | 5 | Dados | `'toys'` com case errado (product_id=7) | Padronizado para `'Toys'` na query |
 | 6 | Dados | `price = 0` na transação id=9 | Excluído do cálculo via `CASE WHEN price > 0` |
 | 7 | Dados | `quantity = 0` na transação id=11 | Filtrado via `WHERE t.quantity > 0` |
